@@ -1,6 +1,6 @@
 # ReverseSSH
 
-Je pense que l'erreur viens du fait que ta commande fonctionne quand tu es dans un terminal car elle "a" un terminal.
+Je pense que l'erreur vient du fait que ta commande fonctionne quand tu es dans un terminal car elle "a" un terminal.
 
 Il faut donc ajouter une option `-T`
 
@@ -24,9 +24,9 @@ Your public key has been saved in /home/user/.ssh/id_rsa.pub
 (...)
 ```
 
-Tu ne mets pas de mot de passe à la clé, c'est déjà suffisemment sécure.
+Tu ne mets pas de mot de passe à la clé, c'est déjà suffisamment secure.
 
-(au pire il existe la possibilité de lancer un agent ssh au démarrage de ton raspeberry pi)
+(au pire il existe la possibilité de lancer un agent ssh au démarrage de ton raspberry pi)
 
 Et ensuite tu envois cette clé sur ton serveur :
 
@@ -38,27 +38,31 @@ user@rasp $ ssh-copy-id user@server_IP
 
 Pof ! Plus de sshpass à la kon
 
-Enfin je suis plus à l'aise avec une configuration ssh_conf, qu'avec une ligne de commande :
+Enfin je suis plus à l'aise avec une configuration ssh_config, qu'avec une ligne de commande :
 
 Voir le fichier [ssh.config](./ssh.config)
 
 ```ssh
-Hostname montunnel
-  Host <Server_IP>
+Host montunnel
+  Hostname <Server_IP>
   User user
   SessionType                                  #  -N
   RequestTTY no                                #  -T
-  ForkAfterAuthentication yes                  #  -f 
+  ForkAfterAuthentication yes                  #  -f (inutile car tu mets ton service en "type simple")
   RemoteForward localhost:10027 localhost:22   #  -R    
 ```
 
 Qui correspond à la commande
 
 ```shell
-ssh -N -T -f -R 10027:127.0.0.1:22 user@server_IP
+ssh -N -T -f -R 10027:127.0.0.1:22 user@server_IP   # Pour un type forking
+ssh -N -T -R 10027:127.0.0.1:22 user@server_IP      # Pour un type simple
 ```
 
-Que tu peux utiliser comme ceci :
+> Pour les types de service systemd
+> voir : <https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html#Type=>
+
+Tu peux utiliser ce fichier ssh.config comme ceci :
 
 ```shell
 ssh -F ssh.config montunnel
@@ -102,7 +106,9 @@ janv. 02 22:28:59 carniceria systemd[1]: Started remotessh.service - Reverse SSH
 
 ```
 
-Il ne reste plus qu'à testé le tunnel ...
+## Tester
+
+Il ne reste plus qu'à tester le tunnel ...
 
 Perso j'ai testé l'accès à mon serveur Cups,
 
