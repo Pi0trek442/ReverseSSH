@@ -63,3 +63,69 @@ Que tu peux utiliser comme ceci :
 ```shell
 ssh -F ssh.config montunnel
 ```
+
+## Créer le service
+
+```shell
+sudo systemctl edit --force --full remotessh.service # Permet de créer le service "remotessh"
+
+|   # Entrée dans un éditeur de texte (nano ou vim)
+| [Unit]
+| Description=Reverse SSH Tunnel
+| After=network-online.target
+| Wants=network-online.target
+|  
+| [Service]
+| Type=simple
+| ExecStart=/usr/bin/ssh -F /root/ssh.config montunnel
+| Restart=on-failure
+| 
+| [Install]
+| WantedBy=multi-user.target
+
+|   # à la fin de l'édition on quitte
+
+sudo systemctl enable remotessh.service
+sudo systemctl start remotessh.service
+sudo systemctl status remotessh.service
+remotessh.service - Reverse SSH Tunnel
+     Loaded: loaded (/etc/systemd/system/remotessh.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2025-01-02 22:28:59 CET; 6min ago
+   Main PID: 92324 (ssh)
+      Tasks: 1 (limit: 18741)
+     Memory: 1.4M (peak: 1.8M)
+        CPU: 142ms
+     CGroup: /system.slice/remotessh.service
+             └─92324 /usr/bin/ssh -F /root/ssh.config montunnel
+
+janv. 02 22:28:59 carniceria systemd[1]: Started remotessh.service - Reverse SSH Tunnel.
+
+```
+
+Il ne reste plus qu'à testé le tunnel ...
+
+Perso j'ai testé l'accès à mon serveur Cups,
+
+en lançant cette remote depuis mon pc vers un conteneur incus :
+
+```ssh-config
+RemoteForward localhost:8000 localhost:631
+```
+
+```shell
+$ incus shell etcdtest                   
+
+root@etcdtest:~# curl localhost:8000 -I
+HTTP/1.1 200 OK
+Connection: Keep-Alive
+Content-Language: fr_FR
+Content-Length: 2340
+Content-Type: text/html; charset=utf-8
+Date: Thu, 02 Jan 2025 21:37:19 GMT
+Keep-Alive: timeout=10
+Last-Modified: Thu, 26 Sep 2024 11:15:36 GMT
+Accept-Encoding: gzip, deflate, identity
+Server: CUPS/2.4 IPP/2.1                            # J'ai bien accès à mon cups ...
+X-Frame-Options: DENY
+Content-Security-Policy: frame-ancestors 'none'
+```
