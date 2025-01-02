@@ -6,7 +6,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/sshpass -p 'password' /usr/bin/ssh -N -R 10027:127.0.0.1:22 user@server_IP
+ExecStart=/usr/bin/ssh -F /root/ssh.config montunnel
 Restart=on-failure
 
 [Install]
